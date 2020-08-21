@@ -116,7 +116,7 @@ class CPU:
                 # Machine code:
                 # 01000111 00000rrr
                 # 47 0r````
-                print(float(self.ram[address]))
+                print(self.reg[self.pc + 1])
     
     def ram_read(self, address):
         return self.ram[address]
