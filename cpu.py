@@ -1,8 +1,8 @@
 """CPU functionality."""
 # SPRINT CHALLENGE NOTES:
-# [ ] Add the `CMP` instruction and `equal` flag to your LS-8.
-# [ ] Add the `JMP` instruction.
-# [ ] Add the `JEQ` and `JNE` instructions.
+# [x] Add the `CMP` instruction and `equal` flag to your LS-8.
+# [x] Add the `JMP` instruction.
+# [x] Add the `JEQ` and `JNE` instructions.
 
 import sys
 
@@ -37,7 +37,7 @@ class CPU:
                     self.ram[address] = int(instruction[0:7], 2)
                     address += 1
 
-    def alu(self, op, reg_a, reg_b):
+    def alu(self, op, reg_a = 0, reg_b = 0):
         """ALU operations."""
 
         if op == "ADD":
@@ -57,6 +57,16 @@ class CPU:
         elif op == 'JMP':
             self.pc = self.reg[reg_a]
             return True
+
+        elif op == 'JNE':
+            value = self.reg[self.fl]
+            if value == 2 or value == 4:
+                return self.alu('JMP', reg_a)
+
+        elif op == 'JEQ':
+            if self.reg[self.fl] == 1:
+                return self.alu('JMP', reg_a)
+
         # # # SPRINT CHALLENGE MVP # # # 
 
         else:
@@ -82,7 +92,7 @@ class CPU:
 
         print()
 
-    def run(self, address, value):
+    def run(self, address = 0, value = 0):
         """Run the CPU."""
         while self.running == True:
 
