@@ -31,18 +31,6 @@ class CPU:
 
         address = 0
 
-        # For now, we've just hardcoded a program:
-
-        #program = [
-        #    # From print8.ls8
-        #    0b10000010, # LDI R0,8
-        #    0b00000000,
-        #    0b00001000,
-        #    0b01000111, # PRN R0
-        #    0b00000000,
-        #    0b00000001, # HLT
-        #]
-
         with open(program) as file:
             for instruction in file:
                 if instruction[0] == '0' or instruction[0] == '1':
@@ -54,7 +42,19 @@ class CPU:
 
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
-        #elif op == "SUB": etc
+
+        # # # SPRINT CHALLENGE MVP # # # 
+        elif op == 'CMP':
+            value_a = self.reg[reg_a]
+            value_b = self.reg[reg_b]
+            if value_a == value_b:
+                self.reg[self.fl] = 1
+            elif value_a > value_b:
+                self.reg[self.fl] = 2
+            else:
+                self.reg[self.fl] = 4
+        # # # SPRINT CHALLENGE MVP # # # 
+
         else:
             raise Exception("Unsupported ALU operation")
 
