@@ -31,16 +31,96 @@ class CPU:
 
         address = 0
 
-        with open(program) as file:
-            for instruction in file:
-                if instruction[0] == '0' or instruction[0] == '1':
-                    self.ram[address] = int(instruction[0:7], 2)
-                    address += 1
+        self.ram = [0b10000010,
+        0b00000000,
+        0b00001010,
+        0b10000010,
+        0b00000001,
+        0b00010100,
+        0b10000010,
+        0b00000010,
+        0b00010011,
+        0b10100111,
+        0b00000000,
+        0b00000001,
+        0b01010101,
+        0b00000010,
+        0b10000010,
+        0b00000011,
+        0b00000001,
+        0b01000111,
+        0b00000011,
+        # # TEST1 (address 19):
+        0b10000010, # LDI R2,TEST2
+        0b00000010,
+        0b00100000,
+        0b10100111, # CMP R0,R1
+        0b00000000,
+        0b00000001,
+        0b01010110, # JNE R2
+        0b00000010,
+        0b10000010, # LDI R3,2
+        0b00000011,
+        0b00000010,
+        0b01000111, # PRN R3
+        0b00000011,
+        # TEST2 (address 32):
+        0b10000010, # LDI R1,10
+        0b00000001,
+        0b00001010,
+        0b10000010, # LDI R2,TEST3
+        0b00000010,
+        0b00110000,
+        0b10100111, # CMP R0,R1
+        0b00000000,
+        0b00000001,
+        0b01010101, # JEQ R2
+        0b00000010,
+        0b10000010, # LDI R3,3
+        0b00000011,
+        0b00000011,
+        0b01000111, # PRN R3
+        0b00000011,
+        # TEST3 (address 48):
+        0b10000010, # LDI R2,TEST4
+        0b00000010,
+        0b00111101,
+        0b10100111, # CMP R0,R1
+        0b00000000,
+        0b00000001,
+        0b01010110, # JNE R2
+        0b00000010,
+        0b10000010, # LDI R3,4
+        0b00000011,
+        0b00000100,
+        0b01000111, # PRN R3
+        0b00000011,
+        # TEST4 (address 61):
+        0b10000010, # LDI R3,5
+        0b00000011,
+        0b00000101,
+        0b01000111, # PRN R3
+        0b00000011,
+        0b10000010, # LDI R2,TEST5
+        0b00000010,
+        0b01001001,
+        0b01010100, # JMP R2
+        0b00000010,
+        0b01000111, # PRN R3
+        0b00000011,
+        # TEST5 (address 73):
+        0b00000001] # HLT
+
+       # with open(program) as file:
+       #     for instruction in file:
+       #         if instruction[0] == '0' or instruction[0] == '1':
+       #             self.ram[address] = int(instruction[0:7], 2)
+       #             address += 1
 
     def alu(self, op, reg_a = 0, reg_b = 0):
         """ALU operations."""
 
-        if op == "ADD":
+        if op == 'ADD':
             self.reg[reg_a] += self.reg[reg_b]
 
         # # # SPRINT CHALLENGE MVP # # # 
@@ -92,31 +172,51 @@ class CPU:
 
         print()
 
-    def run(self, address = 0, value = 0):
+    def run(self):
         """Run the CPU."""
         while self.running == True:
 
             instruction = self.ram[self.pc]
+            print(instruction)
+            print(self.pc)
+
+            if instruction == cmp:
+                self.alu("CMP", reg_a=self.ram[self.pc+1], reg_b=self.ram[self.pc+2])
+                self.pc += 3
+
+            if instruction == jmp:
+                self.alu("JMP", reg_a=self.ram[self.pc+1])
+                self.pc += 2
+
+            if instruction == jeq:
+                self.alu("JEQ", reg_a=self.ram[self.pc+1])
+                self.pc += 2
+
+            if instruction == jne:
+                self.alu("JNE", reg_a=self.ram[self.pc+1])
+                self.pc += 2
 
             if instruction == hlt:
                 self.running = False
 
-            elif instruction == ldi:
+            if instruction == ldi:
                 # `LDI register immediate`
                 # Set the value of a register to an integer.
                 # Machine code:
                 # 10000010 00000rrr iiiiiiii
                 # 82 0r ii
-                self.ram[address] = value
+                self.reg[self.ram[self.pc+1]] = self.pc + 2
+                self.pc += 3
 
-            elif instruction == prn:
+            if instruction == prn:
                 # `PRN register` pseudo-instruction
                 # Print numeric value stored in the given register.
                 # Print to the console the decimal integer value that is stored in the given register.
                 # Machine code:
                 # 01000111 00000rrr
                 # 47 0r````
-                print(self.reg[self.pc + 1])
+                print(self.reg[self.ram[self.pc+1]])
+                self.pc += 2
     
     def ram_read(self, address):
         return self.ram[address]
