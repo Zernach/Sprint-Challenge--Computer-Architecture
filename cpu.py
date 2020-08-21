@@ -53,6 +53,10 @@ class CPU:
                 self.reg[self.fl] = 2
             else:
                 self.reg[self.fl] = 4
+
+        elif op == 'JMP':
+            self.pc = self.reg[reg_a]
+            return True
         # # # SPRINT CHALLENGE MVP # # # 
 
         else:
