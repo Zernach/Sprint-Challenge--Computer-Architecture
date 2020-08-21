@@ -1,7 +1,15 @@
 """CPU functionality."""
+# SPRINT CHALLENGE NOTES:
+# [ ] Add the `CMP` instruction and `equal` flag to your LS-8.
+# [ ] Add the `JMP` instruction.
+# [ ] Add the `JEQ` and `JNE` instructions.
 
 import sys
 
+cmp = 0b10100111
+jmp = 0b01010100
+jeq = 0b01010101
+jne = 0b01010110
 hlt = 0b00000001
 ldi = 0b10000010
 prn = 0b01000111
@@ -11,10 +19,10 @@ class CPU:
 
     def __init__(self):
         """Construct a new CPU."""
+        self.ram = [0] * 256  # the amount of working memory in the hardware
         self.reg = [0] * 8
         self.pc = 0  # program counter - which instruction, or which line is curently being read
         self.fl = 0  # flag - integer, always eight bits
-        self.ram = [0] * 256  # the amount of working memory in the hardware
         self.running = True
         # bitwise - binary conversion equivalent
 
