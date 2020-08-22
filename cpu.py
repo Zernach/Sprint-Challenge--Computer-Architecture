@@ -122,44 +122,43 @@ class CPU:
         #        self.ram[address] = instruction
         #        address += 1
 
-    def alu(self, op, reg_a = 0, reg_b = 0):
-        """ALU operations."""
 
-        def iterate():
-            self.pc += 1
+    def cmp(self, op, reg_a=0, reg_b=0):
+        #if op == "CMP":
+            #self.FL &= 0b00000000
+            if self.reg[reg_a] == self.reg[reg_a]:
+                self.FL = 0b00000001
+            elif self.reg[reg_a] < self.reg[reg_b]:
+                self.FL = 0b00000100
+            elif self.reg[reg_a] > self.reg[reg_b]:
+                self.FL = 0b00000010
+            self.pc += 3
 
-        if op == 'ADD':
-            self.reg[reg_a] += self.reg[reg_b]
+    def hlt(self):
+        self.running = False
 
-        if op == 'CMP':
-            value_a = self.reg[reg_a]
-            value_b = self.reg[reg_b]
-            if value_a == value_b:
-                self.reg[self.fl] = 0b00000001 # 1
-            elif value_a > value_b:
-                self.reg[self.fl] = 0b00000010 # 2
-            else:
-                self.reg[self.fl] = 0b00000100 # 4
-            iterate()
+    def jmp(self, reg_index):
+        self.pc = self.reg[reg_index]
 
-        if op == 'JMP':
-            self.pc = self.reg[reg_a]
-            iterate()
-            return True
-
-        if op == 'JNE':
-            value = self.reg[self.fl]
-            if value == 0b00000010 or value == 0b00000100:
-                iterate()
-                return self.alu('JMP', reg_a)
-
-        if op == 'JEQ':
-            if self.reg[self.fl] == 0b00000001:
-                iterate()
-                return self.alu('JMP', reg_a)
-
+    def jeq(self, reg_index):
+        if self.FL & 1 is 1:
+            self.pc = self.reg[reg_index]
         else:
-            raise Exception("Unsupported ALU operation")
+            self.pc += 2
+
+    def jne(self, reg_index):
+        if self.FL & 1 is 0:
+            self.pc = self.reg[reg_index]
+        else:
+            self.pc += 2
+
+    def ldi(self, reg_index, value):
+        self.reg[reg_index] = value
+        self.pc += 3
+
+    def prn(self, reg_index):
+        print(self.reg[reg_index])
+        self.pc += 2
 
 # Currently Un-Used Function:
 
@@ -187,49 +186,78 @@ class CPU:
         while self.running == True:
 
             instruction = self.ram[self.pc]
-            print(instruction)
-            print(self.pc)
+            #print(instruction)
+            #print(self.pc)
 
             if instruction == CMP:
-                self.alu("CMP", reg_a=self.ram[self.pc+1], reg_b=self.ram[self.pc+2])
-                #self.pc += 3
+                #Compare the values in two registers.
+                #* If they are equal, set the Equal `E` flag to 1, otherwise set it to 0.
+                #* If registerA is less than registerB, set the Less-than `L` flag to 1, otherwise set it to 0.
+                #* If registerA is greater than registerB, set the Greater-than `G` flag to 1, otherwise set it to 0.
+                #Machine code:
+                #10100111 00000aaa 00000bbb
+                #A7 0a 0b
+                reg_a = self.ram[self.pc + 1]
+                reg_b = self.ram[self.pc + 2]
+                self.cmp("CMP", reg_a, reg_b)
 
-            if instruction == JMP:
-                self.alu("JMP", reg_a=self.ram[self.pc+1])
-                #self.pc += 2
+            elif instruction == JMP:
+                #Jump to the address stored in the given register.
+                #Set the `PC` to the address stored in the given register.
+                #Machine code:
+                #01010100 00000rrr
+                #54 0r
+                reg_num = self.ram[self.pc + 1]
+                self.jmp(reg_num)
 
-            if instruction == JEQ:
-                self.alu("JEQ", reg_a=self.ram[self.pc+1])
-                #self.pc += 2
+            elif instruction == JEQ:
+                #If `equal` flag is set (true), jump to the address stored in the given register.
+                #Machine code:
+                #01010101 00000rrr
+                #55 0r
+                reg_num = self.ram[self.pc + 1]
+                self.jeq(reg_num)
 
-            if instruction == JNE:
-                self.alu("JNE", reg_a=self.ram[self.pc+1])
-                #self.pc += 2
+            elif instruction == JNE:
+                #If `E` flag is clear (false, 0), jump to the address stored in the given register.
+                #Machine code:
+                #01010110 00000rrr
+                #56 0r
+                reg_num = self.ram[self.pc + 1]
+                self.jne(reg_num)
 
-            if instruction == HLT:
-                self.running = False
+            elif instruction == HLT:
+                #Halt the CPU (and exit the emulator).
+                #Machine code:
+                #00000001 
+                #01
+                self.hlt()
 
-            if instruction == LDI:
+            elif instruction == LDI:
                 # `LDI register immediate`
                 # Set the value of a register to an integer.
                 # Machine code:
                 # 10000010 00000rrr iiiiiiii
                 # 82 0r ii
-                self.reg[self.ram[self.pc+1]] = self.ram[self.pc + 2]
-                #self.pc += 3
+                reg_index = self.ram[self.pc + 1]
+                value = self.ram[self.pc + 2]
+                self.ldi(reg_index, value)
 
-            if instruction == PRN:
+            elif instruction == PRN:
                 # `PRN register` pseudo-instruction
                 # Print numeric value stored in the given register.
                 # Print to the console the decimal integer value that is stored in the given register.
                 # Machine code:
                 # 01000111 00000rrr
                 # 47 0r````
-                print(self.reg[self.ram[self.pc+1]])
-                #self.pc += 2
-    
-    def ram_read(self, address):
-        return self.ram[address]
+                reg_index = self.ram[self.pc + 1]
+                self.prn(reg_index)
 
-    def ram_write(self, address, value):
-        self.ram[address] = value
+            else:
+                self.pc += 1
+    
+    #def ram_read(self, address):
+    #    return self.ram[address]
+
+    #def ram_write(self, address, value):
+    #    self.ram[address] = value
