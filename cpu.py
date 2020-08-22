@@ -127,15 +127,13 @@ class CPU:
 
 
     def cmp(self, op, reg_a=0, reg_b=0):
-        #if op == "CMP":
-            #self.FL &= 0b00000000
-            if self.reg[reg_a] == self.reg[reg_a]:
-                self.FL = 0b00000001
-            elif self.reg[reg_a] < self.reg[reg_b]:
-                self.FL = 0b00000100
-            elif self.reg[reg_a] > self.reg[reg_b]:
-                self.FL = 0b00000010
-            self.pc += 3
+        if self.reg[reg_a] == self.reg[reg_a]:
+            self.FL = 0b00000001
+        elif self.reg[reg_a] < self.reg[reg_b]:
+            self.FL = 0b00000100
+        elif self.reg[reg_a] > self.reg[reg_b]:
+            self.FL = 0b00000010
+        self.pc += 3
 
     def hlt(self):
         self.running = False
