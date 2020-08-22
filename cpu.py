@@ -29,6 +29,20 @@ class CPU:
     def load(self, program=''):
         """Load a program into memory."""
 
+                # Not being used to read file at the moment:
+
+        address = 0
+        with open(program) as file:
+            for line in file:
+                split_line = line.split('#')[0]
+                command = split_line.strip()
+                if command == '':
+                    continue
+                instruction = int(command, 2)
+                self.ram[address] = instruction
+                address += 1
+
+        """
         self.ram = [0b10000010,
         0b00000000,
         0b00001010,
@@ -108,19 +122,7 @@ class CPU:
         0b00000011,
         # TEST5 (address 73):
         0b00000001] # HLT
-
-        # Not being used to read file at the moment:
-
-        #address = 0
-        #with open(program) as file:
-        #    for line in file:
-        #        split_line = line.split('#')[0]
-        #        command = split_line.strip()
-        #        if command == '':
-        #            continue
-        #        instruction = int(command, 2)
-        #        self.ram[address] = instruction
-        #        address += 1
+        """
 
 
     def cmp(self, op, reg_a=0, reg_b=0):
