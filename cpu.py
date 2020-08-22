@@ -29,8 +29,6 @@ class CPU:
     def load(self, program=''):
         """Load a program into memory."""
 
-                # Not being used to read file at the moment:
-
         address = 0
         with open(program) as file:
             for line in file:
@@ -43,6 +41,9 @@ class CPU:
                 address += 1
 
         """
+
+        # MANUAL FILE READING
+
         self.ram = [0b10000010,
         0b00000000,
         0b00001010,
